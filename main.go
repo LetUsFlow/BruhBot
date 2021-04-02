@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
 )
-
 
 func main() {
 
@@ -21,9 +21,6 @@ func main() {
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
-
-	// In this example, we only care about receiving message events.
-	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -52,12 +49,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
+	if m.Content == "bruh" {
+		dvc, err := s.ChannelVoiceJoin("511925806436712459", "594632765169729556", false, false)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Ping!")
+		dgvoice.PlayAudioFile(dvc, "bruh.mp3", make(chan bool))
+		_ = dvc.Disconnect()
 	}
 }
