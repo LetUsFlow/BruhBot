@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	// If the message is "ping" reply with "Pong!"
-	if m.Content == "bruh" {
+	if strings.ToLower(m.Content) == "bruh" {
 		dvc, err := s.ChannelVoiceJoin("511925806436712459", "594632765169729556", false, false)
 		if err != nil {
 			fmt.Println(err)
