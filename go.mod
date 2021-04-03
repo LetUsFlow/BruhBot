@@ -1,4 +1,4 @@
-module github.com/LetUsFlow/Go_LetUsCopyBot
+module github.com/LetUsFlow/BruhBot
 
 go 1.16
 
