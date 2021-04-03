@@ -48,9 +48,28 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// If the message is "ping" reply with "Pong!"
+
 	if strings.ToLower(m.Content) == "bruh" {
-		dvc, err := s.ChannelVoiceJoin("511925806436712459", "594632765169729556", false, false)
+
+		// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
+		// deshalb s.State.Guild()
+		st, _ := s.State.Guild(m.GuildID)
+
+		vc := func() (vc *discordgo.Channel) {
+			for _, state := range st.VoiceStates {
+				if state.UserID == m.Author.ID {
+					channel, _ := s.State.Channel(state.ChannelID)
+					return channel
+				}
+			}
+			return nil
+		}()
+		if vc == nil {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
+			return
+		}
+
+		dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -58,5 +77,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		dgvoice.PlayAudioFile(dvc, "bruh.mp3", make(chan bool))
 		_ = dvc.Disconnect()
+
+		return
 	}
+
+	// If the message is "bing" reply with "Bong!"
+	if strings.ToLower(m.Content) == "bing" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "Bong!")
+
+		return
+	}
+
+	// If the message is "bong" reply with "Bing!"
+	if strings.ToLower(m.Content) == "bong" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "Bing!")
+
+		return
+	}
+
 }
