@@ -1,0 +1,56 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Install dependencies
+        run: go install
+
+
+      - name: Build
+        run: go build -o bin/bruhbot
+
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts-linux
+          path: ./bin/
+
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Install dependencies
+        run: go install
+
+
+      - name: Build
+        run: go build -o bin/bruhbot.exe
+
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts-windows
+          path: ./bin/
