@@ -10,6 +10,8 @@ import (
 	"syscall"
 )
 
+var joinedServers []string
+
 func main() {
 
 	// Create a new Discord session using the provided bot token.
@@ -75,6 +77,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string) {
+
+	if contains(joinedServers, m.GuildID) {
+		return
+	}
+
+	joinedServers = append(joinedServers, m.GuildID)
+
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
 	st, _ := s.State.Guild(m.GuildID)
@@ -101,4 +110,24 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 
 	dgvoice.PlayAudioFile(dvc, filename, make(chan bool))
 	_ = dvc.Disconnect()
+
+	joinedServers = remove(joinedServers, m.GuildID)
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func remove(s []string, e string) []string {
+	for i, v := range s {
+		if v == e {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
 }
