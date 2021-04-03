@@ -78,12 +78,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string) {
 
-	if contains(joinedServers, m.GuildID) {
-		return
-	}
-
-	joinedServers = append(joinedServers, m.GuildID)
-
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
 	st, _ := s.State.Guild(m.GuildID)
@@ -99,9 +93,13 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 	}()
 	if vc == nil {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
-		joinedServers = remove(joinedServers, m.GuildID)
 		return
 	}
+
+	if contains(joinedServers, m.GuildID) {
+		return
+	}
+	joinedServers = append(joinedServers, m.GuildID)
 
 	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
 	if err != nil {
