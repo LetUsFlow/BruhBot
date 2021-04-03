@@ -99,6 +99,7 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 	}()
 	if vc == nil {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
+		joinedServers = remove(joinedServers, m.GuildID)
 		return
 	}
 
