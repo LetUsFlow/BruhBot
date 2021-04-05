@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/dgvoice"
-	"github.com/bwmarrin/discordgo"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/bwmarrin/dgvoice"
+	"github.com/bwmarrin/discordgo"
 )
 
 var joinedServers []string
