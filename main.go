@@ -56,6 +56,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		playSound(s, m, "sounds/bruh.mp3")
 		return
 	}
+	if strings.ToLower(m.Content) == "haha" {
+		playSound(s, m, "sounds/haha.mp3")
+		return
+	}
 	if strings.ToLower(m.Content) == "ough" {
 		playSound(s, m, "sounds/ough.mp3")
 		return
