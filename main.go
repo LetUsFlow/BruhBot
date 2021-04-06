@@ -64,6 +64,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if voiceMessageHandler(s, m, "haha", "sounds/haha.mp3") {
 		return
 	}
+	if voiceMessageHandler(s, m, "letsgo", "sounds/letsgo.mp3") {
+		return
+	}
 
 	// If the message is "bing" reply with "Bong!"
 	if strings.ToLower(m.Content) == "bing" {
