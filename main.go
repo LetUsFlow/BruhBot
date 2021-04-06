@@ -52,20 +52,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.ToLower(m.Content) == "bruh" {
-		playSound(s, m, "sounds/bruh.mp3")
+	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3") {
 		return
 	}
-	if strings.ToLower(m.Content) == "haha" {
-		playSound(s, m, "sounds/haha.mp3")
+	if voiceMessageHandler(s, m, "ough", "sounds/ough.mp3") {
 		return
 	}
-	if strings.ToLower(m.Content) == "ough" {
-		playSound(s, m, "sounds/ough.mp3")
+	if voiceMessageHandler(s, m, "yooo", "sounds/yooooooooooo.mp3") {
 		return
 	}
-	if strings.ToLower(m.Content) == "yooo" {
-		playSound(s, m, "sounds/yooooooooooo.mp3")
+	if voiceMessageHandler(s, m, "haha", "sounds/haha.mp3") {
 		return
 	}
 
@@ -85,7 +81,20 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 }
 
-func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string) {
+func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, message string, filename string) bool {
+	m.Content = strings.ToLower(m.Content)
+	if m.Content == message {
+		playSound(s, m, filename, true)
+		return true
+	}
+	if strings.Contains(m.Content, message) {
+		playSound(s, m, filename, false)
+		return true
+	}
+	return false
+}
+
+func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, sendErrMsg bool) {
 
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
@@ -101,7 +110,9 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 		return nil
 	}()
 	if vc == nil {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
+		if sendErrMsg {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
+		}
 		return
 	}
 
