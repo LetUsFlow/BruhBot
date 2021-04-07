@@ -58,6 +58,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
+	if voiceMessageHandler(s, m, "moan", "sounds/bonk.mp3") {
+		return
+	}
 	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3") {
 		return
 	}
