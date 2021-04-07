@@ -52,10 +52,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3") {
-		return
+	for i := 21; i >= 1; i-- {
+		if voiceMessageHandler(s, m, fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3")) {
+			return
+		}
 	}
-	if voiceMessageHandler(s, m, "moan13", "sounds/moan13.mp3") {
+	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3") {
 		return
 	}
 	if voiceMessageHandler(s, m, "bann", "sounds/ban_den_weg.mp3") {
