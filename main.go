@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
@@ -138,6 +139,8 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 	}
 	joinedServers = append(joinedServers, m.GuildID)
 
+	go removeGuildAfterTimeout(m.GuildID)
+
 	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
 	if err != nil {
 		fmt.Println(err)
@@ -166,4 +169,11 @@ func remove(s []string, e string) []string {
 		}
 	}
 	return s
+}
+
+func removeGuildAfterTimeout(gid string) {
+	time.Sleep(time.Minute)
+	if contains(joinedServers, gid) {
+		joinedServers = remove(joinedServers, gid)
+	}
 }
