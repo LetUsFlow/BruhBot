@@ -215,7 +215,7 @@ func updateUserCommand(db *sql.DB, userid string, command string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tx.Commit()
+	_ = tx.Commit()
 }
 
 func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
@@ -225,10 +225,10 @@ func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query(&userid, &command)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 	rows.Next()
 	var count int
 	err = rows.Scan(&count)
