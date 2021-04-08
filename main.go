@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,9 +12,11 @@ import (
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var joinedServers []string
+var db *sql.DB
 
 func main() {
 
@@ -22,6 +26,13 @@ func main() {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
+
+	// Connect to statistics database
+	db, err = sql.Open("sqlite3", "./statistics.sqlite")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
@@ -53,7 +64,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	for i := 21; i >= 1; i-- {
+	for i := 21; i >= 2; i-- {
 		if voiceMessageHandler(s, m, fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3")) {
 			return
 		}
@@ -105,17 +116,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, message string, filename string) bool {
 	m.Content = strings.ToLower(m.Content)
 	if m.Content == message {
-		playSound(s, m, filename, true)
+		playSound(s, m, filename, message, true)
 		return true
 	}
 	if strings.Contains(m.Content, message) {
-		playSound(s, m, filename, false)
+		playSound(s, m, filename, message, false)
 		return true
 	}
 	return false
 }
 
-func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, sendErrMsg bool) {
+func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, commandString string, sendErrMsg bool) {
 
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
@@ -150,6 +161,7 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 		return
 	}
 
+	updateUserCommand(db, m.Author.ID, commandString)
 	dgvoice.PlayAudioFile(dvc, filename, make(chan bool))
 	_ = dvc.Disconnect()
 
@@ -179,4 +191,49 @@ func removeGuildAfterTimeout(gid string) {
 	if contains(joinedServers, gid) {
 		joinedServers = remove(joinedServers, gid)
 	}
+}
+
+func updateUserCommand(db *sql.DB, userid string, command string) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var stmt *sql.Stmt
+	if checkUserEntryExists(db, userid, command) { // UPDATE
+		stmt, err = tx.Prepare("UPDATE `statistics` SET `count` = `count` + 1 WHERE `userid` = ? AND `command` = ?")
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else { // INSERT
+		stmt, err = tx.Prepare("INSERT INTO `statistics` (`userid`, `command`, `count`) VALUES (?, ?, 1)")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(userid, command)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit()
+}
+
+func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
+	stmt, err := db.Prepare("SELECT COUNT(*) AS `count` FROM `statistics` WHERE `userid` = ? AND `command` = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(&userid, &command)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows.Next()
+	var count int
+	err = rows.Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return count == 1
 }
