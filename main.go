@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
@@ -210,7 +210,7 @@ func updateUserCommand(db *sql.DB, userid string, command string) {
 			log.Fatal(err)
 		}
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 	_, err = stmt.Exec(userid, command)
 	if err != nil {
 		log.Fatal(err)
@@ -223,12 +223,12 @@ func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 	rows, err := stmt.Query(&userid, &command)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	rows.Next()
 	var count int
 	err = rows.Scan(&count)
