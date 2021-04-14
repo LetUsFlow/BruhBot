@@ -65,35 +65,47 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	for i := 21; i >= 2; i-- {
-		if voiceMessageHandler(s, m, fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3")) {
+		if voiceMessageHandler(s, m, fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false) {
 			return
 		}
 	}
-	if voiceMessageHandler(s, m, "moan", "sounds/bonk.mp3") {
+	if voiceMessageHandler(s, m, "mo", "sounds/mo.mp3", true) {
 		return
 	}
-	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3") {
+	if voiceMessageHandler(s, m, "ma", "sounds/ma.mp3", true) {
 		return
 	}
-	if voiceMessageHandler(s, m, "bann", "sounds/ban_den_weg.mp3") {
+	if voiceMessageHandler(s, m, "ginf", "sounds/ginf.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "jamoin", "sounds/ja_moin.mp3") {
+	if voiceMessageHandler(s, m, "bonk", "sounds/bonk.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "megalovania", "sounds/megalovania.mp3") {
+	if voiceMessageHandler(s, m, "moan", "sounds/bonk.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "ough", "sounds/ough.mp3") {
+	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "yooo", "sounds/yooooooooooo.mp3") {
+	if voiceMessageHandler(s, m, "bann", "sounds/ban_den_weg.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "haha", "sounds/haha.mp3") {
+	if voiceMessageHandler(s, m, "jamoin", "sounds/ja_moin.mp3", false) {
 		return
 	}
-	if voiceMessageHandler(s, m, "letsgo", "sounds/letsgo.mp3") {
+	if voiceMessageHandler(s, m, "megalovania", "sounds/megalovania.mp3", false) {
+		return
+	}
+	if voiceMessageHandler(s, m, "ough", "sounds/ough.mp3", false) {
+		return
+	}
+	if voiceMessageHandler(s, m, "yooo", "sounds/yooooooooooo.mp3", false) {
+		return
+	}
+	if voiceMessageHandler(s, m, "haha", "sounds/haha.mp3", false) {
+		return
+	}
+	if voiceMessageHandler(s, m, "letsgo", "sounds/letsgo.mp3", false) {
 		return
 	}
 
@@ -113,13 +125,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 }
 
-func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, message string, filename string) bool {
+func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, message string, filename string, handleOnlyFullMessage bool) bool {
 	m.Content = strings.ToLower(m.Content)
 	if m.Content == message {
 		playSound(s, m, filename, message, true)
 		return true
 	}
-	if strings.Contains(m.Content, message) {
+	if strings.Contains(m.Content, message) && !handleOnlyFullMessage {
 		playSound(s, m, filename, message, false)
 		return true
 	}
