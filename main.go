@@ -78,6 +78,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if voiceMessageHandler(s, m, "ginf", "sounds/ginf.mp3", false) {
 		return
 	}
+	if voiceMessageHandler(s, m, "teams", "sounds/teams.mp3", false) {
+		return
+	}
 	if voiceMessageHandler(s, m, "bonk", "sounds/bonk.mp3", false) {
 		return
 	}
