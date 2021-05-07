@@ -46,7 +46,7 @@ func main() {
 	}
 
 	// creating commands
-	for i := 21; i >= 1; i-- {
+	for i := 21; i >= 2; i-- {
 		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false})
 	}
 
@@ -69,6 +69,12 @@ func main() {
 	sounds = append(sounds, Sound{"yooo", "sounds/yooooooooooo.mp3", false})
 	sounds = append(sounds, Sound{"haha", "sounds/haha.mp3", false})
 	sounds = append(sounds, Sound{"letsgo", "sounds/letsgo.mp3", false})
+	sounds = append(sounds, Sound{"lugner", "sounds/minze.mp3", false})
+	sounds = append(sounds, Sound{"minze", "sounds/minze.mp3", false})
+	sounds = append(sounds, Sound{"electro", "sounds/electroboom.mp3", false})
+	sounds = append(sounds, Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false})
+	sounds = append(sounds, Sound{"fichtl", "sounds/fichtl.mp3", false})
+	sounds = append(sounds, Sound{"ara", "sounds/ara_ara.mp3", false})
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
