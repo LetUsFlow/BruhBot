@@ -53,6 +53,7 @@ func main() {
 	sounds = append(sounds, Sound{"mo", "sounds/mo.mp3", true})
 	sounds = append(sounds, Sound{"ma", "sounds/ma.mp3", true})
 	sounds = append(sounds, Sound{"ginf", "sounds/ginf.mp3", false})
+	sounds = append(sounds, Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false})
 	sounds = append(sounds, Sound{"teams", "sounds/teams.mp3", false})
 	sounds = append(sounds, Sound{"okay", "sounds/okay.mp3", false})
 	sounds = append(sounds, Sound{"yeet", "sounds/yeet.mp3", false})
