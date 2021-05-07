@@ -17,6 +17,7 @@ import (
 
 var joinedServers []string
 var db *sql.DB
+var sounds []Sound
 
 func main() {
 
@@ -44,6 +45,30 @@ func main() {
 		return
 	}
 
+	// creating commands
+	for i := 21; i >= 1; i-- {
+		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false})
+	}
+
+	sounds = append(sounds, Sound{"mo", "sounds/mo.mp3", true})
+	sounds = append(sounds, Sound{"ma", "sounds/ma.mp3", true})
+	sounds = append(sounds, Sound{"ginf", "sounds/ginf.mp3", false})
+	sounds = append(sounds, Sound{"teams", "sounds/teams.mp3", false})
+	sounds = append(sounds, Sound{"okay", "sounds/okay.mp3", false})
+	sounds = append(sounds, Sound{"yeet", "sounds/yeet.mp3", false})
+	sounds = append(sounds, Sound{"marcos", "sounds/marcos.mp3", false})
+	sounds = append(sounds, Sound{"outlook", "sounds/outlook.mp3", false})
+	sounds = append(sounds, Sound{"bonk", "sounds/bonk.mp3", false})
+	sounds = append(sounds, Sound{"moan", "sounds/bonk.mp3", false})
+	sounds = append(sounds, Sound{"bruh", "sounds/bruh.mp3", false})
+	sounds = append(sounds, Sound{"bann", "sounds/ban_den_weg.mp3", false})
+	sounds = append(sounds, Sound{"jamoin", "sounds/ja_moin.mp3", false})
+	sounds = append(sounds, Sound{"megalovania", "sounds/megalovania.mp3", false})
+	sounds = append(sounds, Sound{"ough", "sounds/ough.mp3", false})
+	sounds = append(sounds, Sound{"yooo", "sounds/yooooooooooo.mp3", false})
+	sounds = append(sounds, Sound{"haha", "sounds/haha.mp3", false})
+	sounds = append(sounds, Sound{"letsgo", "sounds/letsgo.mp3", false})
+
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
@@ -64,64 +89,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	for i := 21; i >= 1; i-- {
-		if voiceMessageHandler(s, m, fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false) {
+	if m.Content == "bruhelp" {
+		var helpstring = sounds[0].message
+
+		for i := 1; i < len(sounds); i++ {
+			helpstring += fmt.Sprintf(", %s", sounds[i].message)
+		}
+
+		_, _ = s.ChannelMessageSend(m.ChannelID, helpstring)
+		return
+	}
+
+	// check for commands
+	for _, sound := range sounds {
+		if voiceMessageHandler(s, m, sound.message, sound.filename, sound.handleOnlyFullMessage) {
 			return
 		}
-	}
-	if voiceMessageHandler(s, m, "mo", "sounds/mo.mp3", true) {
-		return
-	}
-	if voiceMessageHandler(s, m, "ma", "sounds/ma.mp3", true) {
-		return
-	}
-	if voiceMessageHandler(s, m, "ginf", "sounds/ginf.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "teams", "sounds/teams.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "okay", "sounds/okay.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "yeet", "sounds/yeet.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "marcos", "sounds/marcos.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "outlook", "sounds/outlook.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "bonk", "sounds/bonk.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "moan", "sounds/bonk.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "bruh", "sounds/bruh.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "bann", "sounds/ban_den_weg.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "jamoin", "sounds/ja_moin.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "megalovania", "sounds/megalovania.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "ough", "sounds/ough.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "yooo", "sounds/yooooooooooo.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "haha", "sounds/haha.mp3", false) {
-		return
-	}
-	if voiceMessageHandler(s, m, "letsgo", "sounds/letsgo.mp3", false) {
-		return
 	}
 
 	// If the message is "bing" reply with "Bong!"
@@ -263,4 +246,9 @@ func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
 		log.Fatal(err)
 	}
 	return count == 1
+}
+
+type Sound struct {
+	message, filename     string
+	handleOnlyFullMessage bool
 }
