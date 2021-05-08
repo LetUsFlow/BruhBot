@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -21,17 +23,30 @@ var sounds []Sound
 
 func main() {
 
-	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + "ODI2MTgxMTc0NjczNjcwMTQ0.YGIvLQ.SKLXUWuiZ9ZqvddDZ5iTkbIssrg")
+	// Load configuration file
+	content, err := ioutil.ReadFile("./config.json")
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
+		log.Fatal("Error when opening file: ", err)
+		return
+	}
+	var config Config
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+		return
+	}
+
+	// Create a new Discord session using the provided bot token.
+	dg, err := discordgo.New("Bot " + config.Token)
+	if err != nil {
+		log.Fatal("error creating Discord session,", err)
 		return
 	}
 
 	// Connect to statistics database
 	db, err = sql.Open("sqlite3", "./statistics.sqlite")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error opening database", err)
 	}
 	defer func() { _ = db.Close() }()
 
@@ -41,7 +56,7 @@ func main() {
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("error opening connection,", err)
+		log.Fatal("Error opening connection,", err)
 		return
 	}
 
@@ -261,4 +276,8 @@ func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
 type Sound struct {
 	message, filename     string
 	handleOnlyFullMessage bool
+}
+
+type Config struct {
+	Token string
 }
