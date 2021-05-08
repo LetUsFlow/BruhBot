@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/tcolgate/mp3"
 )
 
 var joinedServers []string
@@ -61,38 +63,71 @@ func main() {
 	}
 
 	// creating commands
-	for i := 21; i >= 2; i-- {
-		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false})
+	for i := 21; i >= 1; i-- {
+		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false, time.Minute})
 	}
 
 	sounds = append(sounds,
-		Sound{"mo", "sounds/mo.mp3", true},
-		Sound{"ma", "sounds/ma.mp3", true},
-		Sound{"ginf", "sounds/ginf.mp3", false},
-		Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false},
-		Sound{"teams", "sounds/teams.mp3", false},
-		Sound{"okay", "sounds/okay.mp3", false},
-		Sound{"yeet", "sounds/yeet.mp3", false},
-		Sound{"marcos", "sounds/marcos.mp3", false},
-		Sound{"outlook", "sounds/outlook.mp3", false},
-		Sound{"bonk", "sounds/bonk.mp3", false},
-		Sound{"moan", "sounds/bonk.mp3", false},
-		Sound{"bruh", "sounds/bruh.mp3", false},
-		Sound{"bann", "sounds/ban_den_weg.mp3", false},
-		Sound{"jamoin", "sounds/ja_moin.mp3", false},
-		Sound{"megalovania", "sounds/megalovania.mp3", false},
-		Sound{"ough", "sounds/ough.mp3", false},
-		Sound{"yooo", "sounds/yooooooooooo.mp3", false},
-		Sound{"haha", "sounds/haha.mp3", false},
-		Sound{"letsgo", "sounds/letsgo.mp3", false},
-		Sound{"lugner", "sounds/minze.mp3", false},
-		Sound{"minze", "sounds/minze.mp3", false},
-		Sound{"electro", "sounds/electroboom.mp3", false},
-		Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false},
-		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", false},
-		Sound{"fichtl", "sounds/fichtl.mp3", false},
-		Sound{"ara", "sounds/ara_ara.mp3", false},
+		Sound{"mo", "sounds/mo.mp3", true, time.Minute},
+		Sound{"ma", "sounds/ma.mp3", true, time.Minute},
+		Sound{"ginf", "sounds/ginf.mp3", false, time.Minute},
+		Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false, time.Minute},
+		Sound{"teams", "sounds/teams.mp3", false, time.Minute},
+		Sound{"okay", "sounds/okay.mp3", false, time.Minute},
+		Sound{"yeet", "sounds/yeet.mp3", false, time.Minute},
+		Sound{"marcos", "sounds/marcos.mp3", false, time.Minute},
+		Sound{"outlook", "sounds/outlook.mp3", false, time.Minute},
+		Sound{"bonk", "sounds/bonk.mp3", false, time.Minute},
+		Sound{"moan", "sounds/bonk.mp3", false, time.Minute},
+		Sound{"bruh", "sounds/bruh.mp3", false, time.Minute},
+		Sound{"bann", "sounds/ban_den_weg.mp3", false, time.Minute},
+		Sound{"jamoin", "sounds/ja_moin.mp3", false, time.Minute},
+		Sound{"megalovania", "sounds/megalovania.mp3", false, time.Minute},
+		Sound{"ough", "sounds/ough.mp3", false, time.Minute},
+		Sound{"yooo", "sounds/yooooooooooo.mp3", false, time.Minute},
+		Sound{"haha", "sounds/haha.mp3", false, time.Minute},
+		Sound{"letsgo", "sounds/letsgo.mp3", false, time.Minute},
+		Sound{"lugner", "sounds/minze.mp3", false, time.Minute},
+		Sound{"minze", "sounds/minze.mp3", false, time.Minute},
+		Sound{"electro", "sounds/electroboom.mp3", false, time.Minute},
+		Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false, time.Minute},
+		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", false, time.Minute},
+		Sound{"fichtl", "sounds/fichtl.mp3", false, time.Minute},
+		Sound{"ara", "sounds/ara_ara.mp3", false, time.Minute},
 	)
+
+	for i, sound := range sounds {
+		t := 0.0
+
+		r, err := os.Open(sound.filename)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		d := mp3.NewDecoder(r)
+		var f mp3.Frame
+		skipped := 0
+
+		for {
+			if err := d.Decode(&f, &skipped); err != nil {
+				if err == io.EOF {
+					break
+				}
+				fmt.Println(err)
+				return
+			}
+
+			t = t + f.Duration().Seconds()
+		}
+
+		err = r.Close()
+		if err != nil {
+			return
+		}
+
+		sounds[i].duration = time.Duration(t)*time.Second + time.Second
+	}
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
@@ -127,7 +162,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// check for commands
 	for _, sound := range sounds {
-		if voiceMessageHandler(s, m, sound.message, sound.filename, sound.handleOnlyFullMessage) {
+		if voiceMessageHandler(s, m, sound) {
 			return
 		}
 	}
@@ -148,20 +183,23 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 }
 
-func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, message string, filename string, handleOnlyFullMessage bool) bool {
+func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, sound Sound) bool {
+	message := sound.message
+	filename := sound.filename
+
 	m.Content = strings.ToLower(m.Content)
 	if m.Content == message {
-		playSound(s, m, filename, message, true)
+		playSound(s, m, filename, message, true, sound)
 		return true
 	}
-	if strings.Contains(m.Content, message) && !handleOnlyFullMessage {
-		playSound(s, m, filename, message, false)
+	if strings.Contains(m.Content, message) && !sound.handleOnlyFullMessage {
+		playSound(s, m, filename, message, false, sound)
 		return true
 	}
 	return false
 }
 
-func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, commandString string, sendErrMsg bool) {
+func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, commandString string, sendErrMsg bool, sound Sound) {
 
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
@@ -188,7 +226,7 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 	}
 	joinedServers = append(joinedServers, m.GuildID)
 
-	go removeGuildAfterTimeout(m.GuildID)
+	go removeGuildAfterTimeout(m.GuildID, sound.duration)
 
 	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
 	if err != nil {
@@ -221,8 +259,8 @@ func remove(s []string, e string) []string {
 	return s
 }
 
-func removeGuildAfterTimeout(gid string) {
-	time.Sleep(time.Minute)
+func removeGuildAfterTimeout(gid string, duration time.Duration) {
+	time.Sleep(duration)
 	if contains(joinedServers, gid) {
 		joinedServers = remove(joinedServers, gid)
 	}
@@ -276,6 +314,7 @@ func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
 type Sound struct {
 	message, filename     string
 	handleOnlyFullMessage bool
+	duration              time.Duration
 }
 
 type Config struct {
