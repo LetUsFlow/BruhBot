@@ -94,6 +94,7 @@ func main() {
 		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", false, time.Minute},
 		Sound{"fichtl", "sounds/fichtl.mp3", false, time.Minute},
 		Sound{"ara", "sounds/ara_ara.mp3", false, time.Minute},
+		Sound{"amogus", "sounds/amogus.mp3", false, time.Minute},
 	)
 
 	for i, sound := range sounds {
