@@ -50,31 +50,34 @@ func main() {
 		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false})
 	}
 
-	sounds = append(sounds, Sound{"mo", "sounds/mo.mp3", true})
-	sounds = append(sounds, Sound{"ma", "sounds/ma.mp3", true})
-	sounds = append(sounds, Sound{"ginf", "sounds/ginf.mp3", false})
-	sounds = append(sounds, Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false})
-	sounds = append(sounds, Sound{"teams", "sounds/teams.mp3", false})
-	sounds = append(sounds, Sound{"okay", "sounds/okay.mp3", false})
-	sounds = append(sounds, Sound{"yeet", "sounds/yeet.mp3", false})
-	sounds = append(sounds, Sound{"marcos", "sounds/marcos.mp3", false})
-	sounds = append(sounds, Sound{"outlook", "sounds/outlook.mp3", false})
-	sounds = append(sounds, Sound{"bonk", "sounds/bonk.mp3", false})
-	sounds = append(sounds, Sound{"moan", "sounds/bonk.mp3", false})
-	sounds = append(sounds, Sound{"bruh", "sounds/bruh.mp3", false})
-	sounds = append(sounds, Sound{"bann", "sounds/ban_den_weg.mp3", false})
-	sounds = append(sounds, Sound{"jamoin", "sounds/ja_moin.mp3", false})
-	sounds = append(sounds, Sound{"megalovania", "sounds/megalovania.mp3", false})
-	sounds = append(sounds, Sound{"ough", "sounds/ough.mp3", false})
-	sounds = append(sounds, Sound{"yooo", "sounds/yooooooooooo.mp3", false})
-	sounds = append(sounds, Sound{"haha", "sounds/haha.mp3", false})
-	sounds = append(sounds, Sound{"letsgo", "sounds/letsgo.mp3", false})
-	sounds = append(sounds, Sound{"lugner", "sounds/minze.mp3", false})
-	sounds = append(sounds, Sound{"minze", "sounds/minze.mp3", false})
-	sounds = append(sounds, Sound{"electro", "sounds/electroboom.mp3", false})
-	sounds = append(sounds, Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false})
-	sounds = append(sounds, Sound{"fichtl", "sounds/fichtl.mp3", false})
-	sounds = append(sounds, Sound{"ara", "sounds/ara_ara.mp3", false})
+	sounds = append(sounds,
+		Sound{"mo", "sounds/mo.mp3", true},
+		Sound{"ma", "sounds/ma.mp3", true},
+		Sound{"ginf", "sounds/ginf.mp3", false},
+		Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false},
+		Sound{"teams", "sounds/teams.mp3", false},
+		Sound{"okay", "sounds/okay.mp3", false},
+		Sound{"yeet", "sounds/yeet.mp3", false},
+		Sound{"marcos", "sounds/marcos.mp3", false},
+		Sound{"outlook", "sounds/outlook.mp3", false},
+		Sound{"bonk", "sounds/bonk.mp3", false},
+		Sound{"moan", "sounds/bonk.mp3", false},
+		Sound{"bruh", "sounds/bruh.mp3", false},
+		Sound{"bann", "sounds/ban_den_weg.mp3", false},
+		Sound{"jamoin", "sounds/ja_moin.mp3", false},
+		Sound{"megalovania", "sounds/megalovania.mp3", false},
+		Sound{"ough", "sounds/ough.mp3", false},
+		Sound{"yooo", "sounds/yooooooooooo.mp3", false},
+		Sound{"haha", "sounds/haha.mp3", false},
+		Sound{"letsgo", "sounds/letsgo.mp3", false},
+		Sound{"lugner", "sounds/minze.mp3", false},
+		Sound{"minze", "sounds/minze.mp3", false},
+		Sound{"electro", "sounds/electroboom.mp3", false},
+		Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false},
+		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", false},
+		Sound{"fichtl", "sounds/fichtl.mp3", false},
+		Sound{"ara", "sounds/ara_ara.mp3", false},
+	)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
