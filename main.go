@@ -62,7 +62,7 @@ func main() {
 		return
 	}
 
-	// creating commands
+	// register commands
 	for i := 21; i >= 1; i-- {
 		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false, time.Minute})
 	}
@@ -97,6 +97,7 @@ func main() {
 		Sound{"amogus", "sounds/amogus.mp3", false, time.Minute},
 	)
 
+	// figure out the duration of the sounds
 	for i, sound := range sounds {
 		t := 0.0
 
@@ -136,7 +137,11 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	// Cleanly close down the Discord session.
+	// Cleanly close database connection and the Discord session.
+	err = db.Close()
+	if err != nil {
+		return
+	}
 	_ = dg.Close()
 }
 
@@ -150,7 +155,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "bruhelp" {
+	if strings.ToLower(m.Content) == "bruhelp" {
 		var helpstring = sounds[0].message
 
 		for i := 1; i < len(sounds); i++ {
