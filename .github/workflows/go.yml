@@ -23,7 +23,7 @@ jobs:
 
 
       - name: Build
-        run: go build -o bin/bruhbot
+        run: go build -ldflags="-s -w" -o bin/bruhbot
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
@@ -48,7 +48,7 @@ jobs:
 
 
       - name: Build
-        run: go build -o bin/bruhbot.exe
+        run: go build -ldflags="-s -w" -o bin/bruhbot.exe
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
