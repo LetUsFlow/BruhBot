@@ -232,15 +232,16 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 	}
 	joinedServers = append(joinedServers, m.GuildID)
 
-	go removeGuildAfterTimeout(m.GuildID, sound.duration)
-
 	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
 	if err != nil {
 		fmt.Println(err)
+		joinedServers = remove(joinedServers, m.GuildID)
 		return
 	}
 
-	updateUserCommand(db, m.Author.ID, commandString)
+	go removeGuildAfterTimeout(m.GuildID, sound.duration)
+	go updateUserCommand(db, m.Author.ID, commandString)
+
 	dgvoice.PlayAudioFile(dvc, filename, make(chan bool))
 	_ = dvc.Disconnect()
 
