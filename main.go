@@ -155,7 +155,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.ToLower(m.Content) == "brelp" {
+	if strings.ToLower(m.Content) == "brelp" || strings.ToLower(m.Content) == "bruhelp" {
 		var helpstring = sounds[0].message
 
 		for i := 1; i < len(sounds); i++ {
