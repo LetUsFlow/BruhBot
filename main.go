@@ -95,6 +95,8 @@ func main() {
 		Sound{"fichtl", "sounds/fichtl.mp3", false, time.Minute},
 		Sound{"ara", "sounds/ara_ara.mp3", false, time.Minute},
 		Sound{"amogus", "sounds/amogus.mp3", false, time.Minute},
+		Sound{"donk", "sounds/donk.mp3", false, time.Minute},
+		Sound{"brass", "sounds/brass.mp3", false, time.Minute},
 		Sound{"gunga", "sounds/gunga.mp3", false, time.Minute},
 		Sound{"wesgo", "sounds/wesgo.mp3", false, time.Minute},
 		Sound{"boogie", "sounds/boogie.mp3", false, time.Minute},
