@@ -225,10 +225,7 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 		}
 		return nil
 	}()
-	if vc == nil {
-		if sendErrMsg {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "Bischte dumm oder was? Du muss schon in nem Channel sein kek alda")
-		}
+	if vc == nil { // Do nothing if user is not in a voice channel
 		return
 	}
 
