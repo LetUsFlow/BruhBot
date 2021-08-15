@@ -63,10 +63,6 @@ func main() {
 	}
 
 	// register commands
-	for i := 21; i >= 1; i-- {
-		sounds = append(sounds, Sound{fmt.Sprintf("%s%d", "moan", i), fmt.Sprintf("%s%d%s", "sounds/moans/moan", i, ".mp3"), false, time.Minute})
-	}
-
 	sounds = append(sounds,
 		Sound{"mo", "sounds/mo.mp3", true, time.Minute},
 		Sound{"ma", "sounds/ma.mp3", true, time.Minute},
@@ -78,7 +74,6 @@ func main() {
 		Sound{"marcos", "sounds/marcos.mp3", false, time.Minute},
 		Sound{"outlook", "sounds/outlook.mp3", false, time.Minute},
 		Sound{"bonk", "sounds/bonk.mp3", false, time.Minute},
-		Sound{"moan", "sounds/bonk.mp3", false, time.Minute},
 		Sound{"bruh", "sounds/bruh.mp3", false, time.Minute},
 		Sound{"bann", "sounds/ban_den_weg.mp3", false, time.Minute},
 		Sound{"jamoin", "sounds/ja_moin.mp3", false, time.Minute},
