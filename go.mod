@@ -7,5 +7,5 @@ require (
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/tcolgate/mp3 v0.0.0-20170426193717-e79c5a46d300
-	layeh.com/gopus v0.0.0-20161224163843-0ebf989153aa // indirect
+	layeh.com/gopus v0.0.0-20210501142526-1ee02d434e32 // indirect
 )
