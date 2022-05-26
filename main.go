@@ -49,6 +49,7 @@ func main() {
 	db, err = sql.Open("sqlite3", "./statistics.sqlite")
 	if err != nil {
 		log.Fatal("Error opening database", err)
+		return
 	}
 	defer func() { _ = db.Close() }()
 
