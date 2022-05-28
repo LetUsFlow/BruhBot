@@ -49,6 +49,7 @@ func main() {
 	db, err = sql.Open("sqlite3", "./statistics.sqlite")
 	if err != nil {
 		log.Fatal("Error opening database", err)
+		return
 	}
 	defer func() { _ = db.Close() }()
 
@@ -112,7 +113,7 @@ func main() {
 
 		r, err := os.Open(sound.filename)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal("Error opening sound file", err)
 			return
 		}
 
@@ -125,7 +126,7 @@ func main() {
 				if err == io.EOF {
 					break
 				}
-				fmt.Println(err)
+				log.Fatal("Error decoding sound", err)
 				return
 			}
 
@@ -134,6 +135,7 @@ func main() {
 
 		err = r.Close()
 		if err != nil {
+			log.Fatal("Error closing soundfile", err)
 			return
 		}
 
