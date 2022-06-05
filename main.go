@@ -29,14 +29,13 @@ func main() {
 	// Load configuration file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
 		log.Fatal("error creating Discord session,", err)
-		return
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
@@ -46,7 +45,6 @@ func main() {
 	err = dg.Open()
 	if err != nil {
 		log.Fatal("Error opening connection,", err)
-		return
 	}
 
 	// register commands
@@ -100,7 +98,6 @@ func main() {
 		r, err := os.Open(sound.filename)
 		if err != nil {
 			log.Fatal("Error opening sound file", err)
-			return
 		}
 
 		d := mp3.NewDecoder(r)
@@ -113,7 +110,6 @@ func main() {
 					break
 				}
 				log.Fatal("Error decoding sound", err)
-				return
 			}
 
 			t = t + f.Duration().Seconds()
@@ -122,7 +118,6 @@ func main() {
 		err = r.Close()
 		if err != nil {
 			log.Fatal("Error closing soundfile", err)
-			return
 		}
 
 		sounds[i].duration = time.Duration(t)*time.Second + time.Second
