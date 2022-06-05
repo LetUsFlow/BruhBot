@@ -1,2 +1,2 @@
 # BruhBot
-Just a stupid litte Discord bot I made as a joke.
+A litte Discord bot I made to practice Go and Docker
