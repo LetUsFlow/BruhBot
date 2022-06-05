@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/tcolgate/mp3"
 )
 
@@ -26,27 +24,16 @@ type Sound struct {
 	duration          time.Duration
 }
 
-type Config struct {
-	Token string
-}
-
 func main() {
 
 	// Load configuration file
-	content, err := ioutil.ReadFile("./config.json")
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error when opening file: ", err)
-		return
-	}
-	var config Config
-	err = json.Unmarshal(content, &config)
-	if err != nil {
-		log.Fatal("Error during Unmarshal(): ", err)
-		return
+		log.Fatal("Error loading .env file")
 	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + config.Token)
+	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
 		log.Fatal("error creating Discord session,", err)
 		return
@@ -184,18 +171,18 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, sound Sound) bool {
-	message := sound.message
-	filename := sound.filename
-
-	m.Content = strings.ToLower(m.Content)
-	if m.Content == message {
-		playSound(s, m, filename, message, true, sound)
+	if strings.ToLower(m.Content) == sound.message {
+		go playSound(s, m, sound.filename, sound)
 		return true
 	}
 	return false
 }
 
-func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, commandString string, sendErrMsg bool, sound Sound) {
+func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, sound Sound) {
+	if contains(joinedServers, m.GuildID) {
+		return
+	}
+	joinedServers = append(joinedServers, m.GuildID)
 
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
@@ -211,25 +198,24 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 		return nil
 	}()
 	if vc == nil { // Do nothing if user is not in a voice channel
-		return
-	}
-
-	if contains(joinedServers, m.GuildID) {
-		return
-	}
-	joinedServers = append(joinedServers, m.GuildID)
-
-	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
-	if err != nil {
-		fmt.Println(err)
 		joinedServers = remove(joinedServers, m.GuildID)
 		return
 	}
 
-	go removeGuildAfterTimeout(m.GuildID, sound.duration)
+	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
+	if err != nil {
+		log.Println("failed joining voice channel")
+		joinedServers = remove(joinedServers, m.GuildID)
+		return
+	}
+
+	go removeGuildAfterTimeout(m.GuildID, sound.duration, dvc)
 
 	dgvoice.PlayAudioFile(dvc, filename, make(chan bool))
-	_ = dvc.Disconnect()
+	err = dvc.Disconnect()
+	if err != nil {
+		log.Println("failed leaving voice channel")
+	}
 
 	joinedServers = remove(joinedServers, m.GuildID)
 }
@@ -252,7 +238,7 @@ func remove(s []string, e string) []string {
 	return s
 }
 
-func removeGuildAfterTimeout(gid string, duration time.Duration) {
+func removeGuildAfterTimeout(gid string, duration time.Duration, dvc *discordgo.VoiceConnection) {
 	time.Sleep(duration)
 	if contains(joinedServers, gid) {
 		joinedServers = remove(joinedServers, gid)
