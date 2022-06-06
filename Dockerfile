@@ -14,7 +14,6 @@ WORKDIR /opt/bruhbot
 COPY --from=build /src/bruhbot/bin/bruhbot ./
 COPY --from=build /src/bruhbot/sounds/ ./sounds/
 
-RUN apt-get update
-RUN apt-get install ca-certificates ffmpeg --no-install-recommends -y
+RUN apt-get update -y && apt-get install ca-certificates ffmpeg --no-install-recommends -y
 
 CMD [ "./bruhbot" ]
