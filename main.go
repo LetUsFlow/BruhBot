@@ -1,11 +1,9 @@
 package main
 
 import (
-	"database/sql"
-	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -15,43 +13,30 @@ import (
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/tcolgate/mp3"
 )
 
 var joinedServers []string
-var db *sql.DB
 var sounds []Sound
+
+type Sound struct {
+	message, filename string
+	duration          time.Duration
+}
 
 func main() {
 
 	// Load configuration file
-	content, err := ioutil.ReadFile("./config.json")
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error when opening file: ", err)
-		return
-	}
-	var config Config
-	err = json.Unmarshal(content, &config)
-	if err != nil {
-		log.Fatal("Error during Unmarshal(): ", err)
-		return
+		log.Println("Error loading .env file")
 	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + config.Token)
+	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
 		log.Fatal("error creating Discord session,", err)
-		return
 	}
-
-	// Connect to statistics database
-	db, err = sql.Open("sqlite3", "./statistics.sqlite")
-	if err != nil {
-		log.Fatal("Error opening database", err)
-		return
-	}
-	defer func() { _ = db.Close() }()
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
@@ -60,51 +45,50 @@ func main() {
 	err = dg.Open()
 	if err != nil {
 		log.Fatal("Error opening connection,", err)
-		return
 	}
 
 	// register commands
 	sounds = append(sounds,
-		Sound{"mo", "sounds/mo.mp3", true, time.Minute},
-		Sound{"ma", "sounds/ma.mp3", true, time.Minute},
-		Sound{"ginf", "sounds/ginf.mp3", false, time.Minute},
-		Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", false, time.Minute},
-		Sound{"teams", "sounds/teams.mp3", false, time.Minute},
-		Sound{"okay", "sounds/okay.mp3", false, time.Minute},
-		Sound{"yeet", "sounds/yeet.mp3", false, time.Minute},
-		Sound{"marcos", "sounds/marcos.mp3", false, time.Minute},
-		Sound{"outlook", "sounds/outlook.mp3", false, time.Minute},
-		Sound{"bonk", "sounds/bonk.mp3", false, time.Minute},
-		Sound{"bruh", "sounds/bruh.mp3", false, time.Minute},
-		Sound{"bann", "sounds/ban_den_weg.mp3", false, time.Minute},
-		Sound{"jamoin", "sounds/ja_moin.mp3", false, time.Minute},
-		Sound{"megalovania", "sounds/megalovania.mp3", false, time.Minute},
-		Sound{"ough", "sounds/ough.mp3", false, time.Minute},
-		Sound{"yooo", "sounds/yooooooooooo.mp3", false, time.Minute},
-		Sound{"haha", "sounds/haha.mp3", false, time.Minute},
-		Sound{"letsgo", "sounds/letsgo.mp3", false, time.Minute},
-		Sound{"lugner", "sounds/minze.mp3", false, time.Minute},
-		Sound{"minze", "sounds/minze.mp3", false, time.Minute},
-		Sound{"electro", "sounds/electroboom.mp3", false, time.Minute},
-		Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", false, time.Minute},
-		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", false, time.Minute},
-		Sound{"fichtl", "sounds/fichtl.mp3", false, time.Minute},
-		Sound{"ara", "sounds/ara_ara.mp3", false, time.Minute},
-		Sound{"amogus", "sounds/amogus.mp3", false, time.Minute},
-		Sound{"donk", "sounds/donk.mp3", false, time.Minute},
-		Sound{"brass", "sounds/brass.mp3", false, time.Minute},
-		Sound{"gunga", "sounds/gunga.mp3", false, time.Minute},
-		Sound{"wesgo", "sounds/wesgo.mp3", false, time.Minute},
-		Sound{"boogie", "sounds/boogie.mp3", false, time.Minute},
-		Sound{"laugh", "sounds/laugh.mp3", false, time.Minute},
-		Sound{"splishsplash", "sounds/splishsplash.mp3", false, time.Minute},
-		Sound{"onemorething", "sounds/onemorething.mp3", false, time.Minute},
-		Sound{"jojo", "sounds/jojo.mp3", false, time.Minute},
-		Sound{"maria", "sounds/maria.mp3", false, time.Minute},
-		Sound{"gay", "sounds/imgay.mp3", false, time.Minute},
-		Sound{"weeee", "sounds/weeee.mp3", false, time.Minute},
-		Sound{"abadaba", "sounds/abadaba.mp3", false, time.Minute},
-		Sound{"wah", "sounds/wah.mp3", false, time.Minute},
+		Sound{"mo", "sounds/mo.mp3", time.Minute},
+		Sound{"ma", "sounds/ma.mp3", time.Minute},
+		Sound{"ginf", "sounds/ginf.mp3", time.Minute},
+		Sound{"depression", "sounds/warum_bin_ich_so_fröhlich.mp3", time.Minute},
+		Sound{"teams", "sounds/teams.mp3", time.Minute},
+		Sound{"okay", "sounds/okay.mp3", time.Minute},
+		Sound{"yeet", "sounds/yeet.mp3", time.Minute},
+		Sound{"marcos", "sounds/marcos.mp3", time.Minute},
+		Sound{"outlook", "sounds/outlook.mp3", time.Minute},
+		Sound{"bonk", "sounds/bonk.mp3", time.Minute},
+		Sound{"bruh", "sounds/bruh.mp3", time.Minute},
+		Sound{"bann", "sounds/ban_den_weg.mp3", time.Minute},
+		Sound{"jamoin", "sounds/ja_moin.mp3", time.Minute},
+		Sound{"megalovania", "sounds/megalovania.mp3", time.Minute},
+		Sound{"ough", "sounds/ough.mp3", time.Minute},
+		Sound{"yooo", "sounds/yooooooooooo.mp3", time.Minute},
+		Sound{"haha", "sounds/haha.mp3", time.Minute},
+		Sound{"letsgo", "sounds/letsgo.mp3", time.Minute},
+		Sound{"lugner", "sounds/minze.mp3", time.Minute},
+		Sound{"minze", "sounds/minze.mp3", time.Minute},
+		Sound{"electro", "sounds/electroboom.mp3", time.Minute},
+		Sound{"boom", "sounds/full_bridge_rectifier_song.mp3", time.Minute},
+		Sound{"rectify", "sounds/full_bridge_rectifier_song.mp3", time.Minute},
+		Sound{"fichtl", "sounds/fichtl.mp3", time.Minute},
+		Sound{"ara", "sounds/ara_ara.mp3", time.Minute},
+		Sound{"amogus", "sounds/amogus.mp3", time.Minute},
+		Sound{"donk", "sounds/donk.mp3", time.Minute},
+		Sound{"brass", "sounds/brass.mp3", time.Minute},
+		Sound{"gunga", "sounds/gunga.mp3", time.Minute},
+		Sound{"wesgo", "sounds/wesgo.mp3", time.Minute},
+		Sound{"boogie", "sounds/boogie.mp3", time.Minute},
+		Sound{"laugh", "sounds/laugh.mp3", time.Minute},
+		Sound{"splishsplash", "sounds/splishsplash.mp3", time.Minute},
+		Sound{"onemorething", "sounds/onemorething.mp3", time.Minute},
+		Sound{"jojo", "sounds/jojo.mp3", time.Minute},
+		Sound{"maria", "sounds/maria.mp3", time.Minute},
+		Sound{"gay", "sounds/imgay.mp3", time.Minute},
+		Sound{"weeee", "sounds/weeee.mp3", time.Minute},
+		Sound{"abadaba", "sounds/abadaba.mp3", time.Minute},
+		Sound{"wah", "sounds/wah.mp3", time.Minute},
 	)
 
 	// figure out the duration of the sounds
@@ -114,7 +98,6 @@ func main() {
 		r, err := os.Open(sound.filename)
 		if err != nil {
 			log.Fatal("Error opening sound file", err)
-			return
 		}
 
 		d := mp3.NewDecoder(r)
@@ -127,7 +110,6 @@ func main() {
 					break
 				}
 				log.Fatal("Error decoding sound", err)
-				return
 			}
 
 			t = t + f.Duration().Seconds()
@@ -136,7 +118,6 @@ func main() {
 		err = r.Close()
 		if err != nil {
 			log.Fatal("Error closing soundfile", err)
-			return
 		}
 
 		sounds[i].duration = time.Duration(t)*time.Second + time.Second
@@ -148,8 +129,7 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	// Cleanly close database connection and the Discord session.
-	err = db.Close()
+	// Close Discord session
 	if err != nil {
 		return
 	}
@@ -183,40 +163,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
-
-	// If the message is "bing" reply with "Bong!"
-	if strings.ToLower(m.Content) == "bing" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Bong!")
-
-		return
-	}
-
-	// If the message is "bong" reply with "Bing!"
-	if strings.ToLower(m.Content) == "bong" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Bing!")
-
-		return
-	}
-
 }
 
 func voiceMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, sound Sound) bool {
-	message := sound.message
-	filename := sound.filename
-
-	m.Content = strings.ToLower(m.Content)
-	if m.Content == message {
-		playSound(s, m, filename, message, true, sound)
-		return true
-	}
-	if strings.Contains(m.Content, message) && !sound.handleOnlyFullMessage {
-		playSound(s, m, filename, message, false, sound)
+	if strings.ToLower(m.Content) == sound.message {
+		go playSound(s, m, sound.filename, sound)
 		return true
 	}
 	return false
 }
 
-func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, commandString string, sendErrMsg bool, sound Sound) {
+func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string, sound Sound) {
+	if contains(joinedServers, m.GuildID) {
+		return
+	}
+	joinedServers = append(joinedServers, m.GuildID)
 
 	// s.Guild() funktioniert hier nicht, weil die VoiceStates nur in "state-cached guilds" verfügbar sind,
 	// deshalb s.State.Guild()
@@ -232,26 +193,24 @@ func playSound(s *discordgo.Session, m *discordgo.MessageCreate, filename string
 		return nil
 	}()
 	if vc == nil { // Do nothing if user is not in a voice channel
-		return
-	}
-
-	if contains(joinedServers, m.GuildID) {
-		return
-	}
-	joinedServers = append(joinedServers, m.GuildID)
-
-	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
-	if err != nil {
-		fmt.Println(err)
 		joinedServers = remove(joinedServers, m.GuildID)
 		return
 	}
 
-	go removeGuildAfterTimeout(m.GuildID, sound.duration)
-	go updateUserCommand(db, m.Author.ID, commandString)
+	dvc, err := s.ChannelVoiceJoin(vc.GuildID, vc.ID, false, true)
+	if err != nil {
+		log.Println("failed joining voice channel")
+		joinedServers = remove(joinedServers, m.GuildID)
+		return
+	}
+
+	go removeGuildAfterTimeout(m.GuildID, sound.duration, dvc)
 
 	dgvoice.PlayAudioFile(dvc, filename, make(chan bool))
-	_ = dvc.Disconnect()
+	err = dvc.Disconnect()
+	if err != nil {
+		log.Println("failed leaving voice channel")
+	}
 
 	joinedServers = remove(joinedServers, m.GuildID)
 }
@@ -274,64 +233,9 @@ func remove(s []string, e string) []string {
 	return s
 }
 
-func removeGuildAfterTimeout(gid string, duration time.Duration) {
+func removeGuildAfterTimeout(gid string, duration time.Duration, dvc *discordgo.VoiceConnection) {
 	time.Sleep(duration)
 	if contains(joinedServers, gid) {
 		joinedServers = remove(joinedServers, gid)
 	}
-}
-
-func updateUserCommand(db *sql.DB, userid string, command string) {
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var stmt *sql.Stmt
-	if checkUserEntryExists(db, userid, command) { // UPDATE
-		stmt, err = tx.Prepare("UPDATE `statistics` SET `count` = `count` + 1 WHERE `userid` = ? AND `command` = ?")
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else { // INSERT
-		stmt, err = tx.Prepare("INSERT INTO `statistics` (`userid`, `command`, `count`) VALUES (?, ?, 1)")
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	defer func() { _ = stmt.Close() }()
-	_, err = stmt.Exec(userid, command)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_ = tx.Commit()
-}
-
-func checkUserEntryExists(db *sql.DB, userid string, command string) bool {
-	stmt, err := db.Prepare("SELECT COUNT(*) AS `count` FROM `statistics` WHERE `userid` = ? AND `command` = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() { _ = stmt.Close() }()
-	rows, err := stmt.Query(&userid, &command)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() { _ = rows.Close() }()
-	rows.Next()
-	var count int
-	err = rows.Scan(&count)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return count == 1
-}
-
-type Sound struct {
-	message, filename     string
-	handleOnlyFullMessage bool
-	duration              time.Duration
-}
-
-type Config struct {
-	Token string
 }
