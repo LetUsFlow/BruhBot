@@ -1,2 +1,2 @@
 # BruhBot
-A litte Discord bot I made to practice Go and Docker
+A Discord bot I made to practice Go and Docker
