@@ -1,19 +1,27 @@
 FROM golang:1.18-bullseye AS build
 
-WORKDIR /src/bruhbot
-
-COPY . .
+COPY . /app
+WORKDIR /app
 
 RUN go build -ldflags="-s -w" -o bin/bruhbot
 
+FROM alpine as compressor
 
-FROM debian:bullseye-slim AS bin
+COPY --from=build /app/bin/bruhbot /app/bin/bruhbot
 
-WORKDIR /opt/bruhbot
+RUN apk add upx && \
+    upx --lzma --best /app/bin/bruhbot
 
-COPY --from=build /src/bruhbot/bin/bruhbot ./
-COPY --from=build /src/bruhbot/sounds/ ./sounds/
+FROM frolvlad/alpine-glibc
 
-RUN apt-get update -y && apt-get install ca-certificates ffmpeg --no-install-recommends -y
+WORKDIR /app
 
-CMD [ "./bruhbot" ]
+COPY --from=compressor /app/bin/bruhbot /app/bruhbot
+COPY --from=build /app/sounds/ /app/sounds/
+
+RUN apk add --no-cache ffmpeg && \
+    rm -fr /var/cache/apk/*
+
+USER 1000
+
+CMD [ "/app/bruhbot" ]
