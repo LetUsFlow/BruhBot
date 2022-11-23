@@ -243,5 +243,6 @@ func removeGuildAfterTimeout(gid string, duration time.Duration, dvc *discordgo.
 	time.Sleep(duration)
 	if contains(joinedServers, gid) {
 		joinedServers = remove(joinedServers, gid)
+		_ = dvc.Disconnect()
 	}
 }
