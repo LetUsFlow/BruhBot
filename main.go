@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"os"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 	"github.com/tcolgate/mp3"
 )
 
