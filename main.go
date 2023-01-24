@@ -96,6 +96,7 @@ func main() {
 		Sound{"sad", "sounds/sad.mp3", time.Minute},
 		Sound{"quack", "sounds/quack.mp3", time.Minute},
 		Sound{"snore", "sounds/snore.mp3", time.Minute},
+		Sound{"care", "sounds/dont-care.mp3", time.Minute},
 	)
 
 	// figure out the duration of the sounds
